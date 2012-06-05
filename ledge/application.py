@@ -15,7 +15,7 @@ class Application(flask.Flask):
     CONFIG_ENV = "LEDGE_CONFIG"
     LOG_FILE = "../app.log"
 
-    BUILTIN_BLUEPRINTS = []
+    BUILTIN_BLUEPRINTS = ["ledge.account.app"]
 
     def __init__(self, import_name=__package__, *args, **kwargs):
         super(Application, self).__init__(import_name, *args, **kwargs)
@@ -36,7 +36,18 @@ class Application(flask.Flask):
 
     def _init_blueprints(self):
         """Register the built-in blueprints of the application."""
-        pass
+        for name in self.BUILTIN_BLUEPRINTS:
+            # split the name
+            splited = name.split(".")
+            blueprint_name = splited[-1]
+            module_name = ".".join(splited[:-1])
+            package_name = splited[0]
+            # dynamic find the blueprint
+            module = __import__(module_name, fromlist=[package_name])
+            blueprint = getattr(module, blueprint_name)
+            # register it
+            self.register_blueprint(blueprint)
+            self.logger.info("Loaded %r" % name)
 
     def get_full_path(self, relative_path):
         """Create a absolute path from a relative path.
