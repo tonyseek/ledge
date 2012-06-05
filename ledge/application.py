@@ -37,17 +37,25 @@ class Application(flask.Flask):
     def _init_blueprints(self):
         """Register the built-in blueprints of the application."""
         for name in self.BUILTIN_BLUEPRINTS:
-            # split the name
-            splited = name.split(".")
-            blueprint_name = splited[-1]
-            module_name = ".".join(splited[:-1])
-            package_name = splited[0]
-            # dynamic find the blueprint
-            module = __import__(module_name, fromlist=[package_name])
-            blueprint = getattr(module, blueprint_name)
-            # register it
-            self.register_blueprint(blueprint)
-            self.logger.info("Loaded %r" % name)
+            self.register_blueprint_by_name(name)
+
+    def register_blueprint_by_name(self, name):
+        """Register the blueprint by its name."""
+        # split the name
+        splited = name.split(".")
+        blueprint_name = splited[-1]
+        module_name = ".".join(splited[:-1])
+        package_name = splited[0]
+        # dynamic find the blueprint
+        module = __import__(module_name, fromlist=[package_name])
+        blueprint = getattr(module, blueprint_name)
+        # load the all submodules
+        for submodule_name in getattr(module, "__all__", []):
+            if not hasattr(module, submodule_name):
+                __import__("%s.%s" % (module_name, submodule_name))
+        # register it
+        self.register_blueprint(blueprint)
+        self.logger.info("Loaded %r" % name)
 
     def get_full_path(self, relative_path):
         """Create a absolute path from a relative path.
