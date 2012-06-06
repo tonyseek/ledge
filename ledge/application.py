@@ -2,6 +2,7 @@
 #-*- coding:utf-8 -*-
 
 import os
+import itertools
 
 import flask
 
@@ -36,7 +37,12 @@ class Application(flask.Flask):
 
     def _init_blueprints(self):
         """Register the built-in blueprints of the application."""
-        for name in self.BUILTIN_BLUEPRINTS:
+        self.config.setdefault("BLUEPRINTS", [])
+
+        builtins = self.BUILTIN_BLUEPRINTS
+        others = self.config["BLUEPRINTS"]
+
+        for name in itertools.chain(builtins, others):
             self.register_blueprint_by_name(name)
 
     def register_blueprint_by_name(self, name):
