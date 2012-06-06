@@ -15,6 +15,9 @@ current_datetime = lambda: datetime.datetime.utcnow()
 class UserQuery(db.Query):
     """Query Handler of `User` model."""
 
+    def get(self, id):
+        return super(UserQuery, self).get(id.lower())
+
     def authenticate(self, email_or_username, password):
         """Authenicate by email/username and password.
 
@@ -35,22 +38,26 @@ class User(JsonizableMixin, db.Model):
     """The account of the user."""
 
     query_class = UserQuery
-    JSONIZE_ATTRS = ("id", "nickname", "is_male", "created")
+    JSONIZE_ATTRS = ("id", "nickname", "gender", "created")
+    GENDER_ENUM = ("male", "female", "unknown")
 
     id = db.Column(db.String(20), primary_key=True)
     email = db.Column(db.String(64), unique=True)
     nickname = db.Column(db.Unicode(20))
-    is_male = db.Column(db.Boolean, default=None)
+    gender = db.Column(db.Enum(name="gender", *GENDER_ENUM), default="unknown")
     salt = db.Column(db.String(32), nullable=False)
     hashed_password = db.Column(db.String(64), nullable=False)
     created = db.Column(db.DateTime, nullable=False, default=current_datetime)
 
     def __init__(self, **data):
+        password = data.pop("password")
         super(User, self).__init__(**data)
-        self.change_password(data.pop("password"))
+        self.change_password(password)
+        self.nickname = self.nickname or self.id
+        self.id = self.id.lower()
 
     def __repr__(self):
-        return "<User %s(%s)>" % (self.username, self.email)
+        return "<User %s(%s)>" % (self.id, self.email)
 
     def change_password(self, password):
         """Change a new password."""

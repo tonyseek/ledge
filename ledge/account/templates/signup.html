@@ -1,0 +1,23 @@
+{% extends "layout/master.html" %}
+
+
+{% macro render_field(field) %}
+    <div>
+        {{ field.label() }}
+        {{ field() }}
+    </div>
+{% endmacro %}
+
+
+{% block body %}
+    <form action="{{ request.path }}" method="post">
+        {{ render_field(form.id) }}
+        {{ render_field(form.email) }}
+        {{ render_field(form.password) }}
+        {% for gender in form.gender %}
+            {{ render_field(gender) }}
+        {% endfor %}
+        {{ render_field(form.nickname) }}
+        {{ render_field(form.submit) }}
+    </form>
+{% endblock %}
