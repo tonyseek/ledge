@@ -4,3 +4,5 @@
 *.egg-info
 build/
 dist/
+ledge/static/.webassets-cache/
+ledge/static/packed/

@@ -2,9 +2,54 @@
 <html>
     <head>
         <title>{{ title | default("ledge") }}</title>
+        {%- for bundle in assets.stylesheets %}
+        {%- assets bundle %}
+        <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
+        {%- endassets %}
+        {%- endfor %}
+        {%- for bundle in assets.scripts %}
+        {%- assets bundle %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+        {%- endassets %}
+        {%- endfor %}
     </head>
-    <body>
-    {%- block body %}
-    {%- endblock %}
+    <body class="container">
+        <header>
+            <div class="navbar">
+                <div class="navbar-inner container">
+                    <h1>
+                        <a class="brand" href="/">Ledge</a>
+                        <span class="brand">manage your knowledge</span>
+                    </h1>
+                    <ul class="nav">
+                        <li class="active"><a href="#">Home</a></li>
+                        <li><a href="#">Link</a></li>
+                        <li><a href="#">Link</a></li>
+                        <li><a href="#">Link</a></li>
+                    </ul>
+                    <ul class="nav pull-right">
+                        <li><a href="#">Link</a></li>
+                        <li class="divider-vertical"></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        {%- block body %}
+        {%- endblock %}
+
+        <footer class="footer">
+            <div class="pull-right">Copyright &copy; TonySeek</div>
+        </footer>
     </body>
 </html>

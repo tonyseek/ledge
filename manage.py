@@ -7,10 +7,12 @@ from flask.ext.script import Manager
 from pep8 import _main as check_pep8
 
 from ledge.application import Application
+from ledge.extensions import configure_manager
 
 
 app = Application()
 manager = Manager(app)
+configure_manager(manager)
 
 
 @manager.option('-i', dest='input_file', help="check the input file.")
