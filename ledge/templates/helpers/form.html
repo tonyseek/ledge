@@ -2,9 +2,25 @@
     <div class="control-group{% if field.errors %} error{% endif %}">
         {{ field.label(class="control-label") }}
         <div class="controls">
-            {{ field(**kwargs) }}
+            {%- if caller is defined %}
+            {{ caller() }}
+            {%- else %}
+            {{- field(**kwargs) }}
+            {%- endif %}
             <span class="help-inline">{{ field.description }}</span>
             <span class="help-inline">{{ field.errors | join("、") }}</span>
         </div>
     </div>
+{%- endmacro %}
+
+
+{%- macro render_radios(radios) %}
+    {%- call render_field(radios) %}
+        {%- for radio in radios %}
+            <label for="{{ radio.id }}">
+                {{ radio(**kwargs) }}
+                {{ radio.label.text }}
+            </label>
+        {%- endfor %}
+    {%- endcall %}
 {%- endmacro %}
