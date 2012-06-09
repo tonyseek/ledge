@@ -1,30 +1,32 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-from flask import render_template, jsonify
-from flask.views import MethodView
+from flask import render_template, redirect, url_for
 from flask.ext.wtf import (Form, TextField, PasswordField, RadioField,
         SubmitField, ValidationError, required, email)
 from flask.ext.wtf.html5 import EmailField
 
-from ledge.corelib.decorators import as_view
-from ledge.extensions import db
+from ledge.corelib.views import as_view, MethodView
 from ledge.account import app
 from ledge.account.models import User
+from ledge.account.services import signup
 
 
 class SignUpForm(Form):
     """The form of signing up."""
 
     def id_unique(self, id):
-        label = self.id.label.text.lower()
         if User.query.get(id.data):
-            raise ValidationError("The %s has been used." % label)
+            raise ValidationError("The %s has been used." % id.label.text)
+
+    def email_unique(self, email):
+        if User.query.filter_by(email=email.data).first():
+            raise ValidationError("The %s has been used." % email.label.text)
 
     GENDER_CHOICES = [(gender, gender.title()) for gender in User.GENDER_ENUM]
 
     id = TextField("User Name", [required(), id_unique])
-    email = EmailField("Email", [required(), email()])
+    email = EmailField("Email", [required(), email(), email_unique])
     password = PasswordField("Password", [required()])
     gender = RadioField("Gender", [required()], choices=GENDER_CHOICES)
     nickname = TextField("Screen Name", [])
@@ -36,18 +38,22 @@ class SignUpForm(Form):
 class SignUpView(MethodView):
     """The view of signing up."""
 
-    def dispatch_request(self):
+    def prepare(self):
         self.form = SignUpForm()
-        return super(SignUpView.view_class, self).dispatch_request()
 
     def get(self):
         return render_template("signup.html", **vars(self))
 
     def post(self):
         if not self.form.validate():
-            return jsonify(errors=self.form.errors, id=self.form.id.data)
+            return render_template("signup.html", **vars(self))
         user = User()
         self.form.populate_obj(user)
-        db.session.add(user)
-        db.session.commit()
-        return render_template("signup.html", **vars(self))
+        signup(user)
+        return redirect(url_for("account.signup"))
+
+
+@app.route("/people/<string:id>")
+def profile(id):
+    user = User.query.get_or_404(id)
+    return render_template("profile.html", user=user)

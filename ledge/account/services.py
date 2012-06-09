@@ -2,7 +2,6 @@
 #-*- coding:utf-8 -*-
 
 from ledge.extensions import db
-from ledge.account.models import User
 
 
 def signup(user):

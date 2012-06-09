@@ -24,7 +24,7 @@ class UserQuery(db.Query):
         If email/username isn't exist or password is wrong, this method would
         return `None`, otherwise return the `models.User` model.
         """
-        condition = ((User.email == email_or_username) |
+        condition = ((User.email == email_or_username.lower()) |
                      (User.username == email_or_username))
         user = self.filter(condition).first()
         if not user:
@@ -50,11 +50,10 @@ class User(JsonizableMixin, db.Model):
     created = db.Column(db.DateTime, nullable=False, default=current_datetime)
 
     def __init__(self, **data):
-        password = data.pop("password")
+        password = data.pop("password", "")
         super(User, self).__init__(**data)
         self.change_password(password)
         self.nickname = self.nickname or self.id
-        self.id = self.id.lower()
 
     def __repr__(self):
         return "<User %s(%s)>" % (self.id, self.email)
@@ -75,6 +74,10 @@ class User(JsonizableMixin, db.Model):
         hashed = hashlib.sha256()
         hashed.update("<%s|%s>" % (salt, password))
         return hashed.hexdigest()
+
+    @db.validates("id")
+    def validate_id(self, key, value):
+        return value.lower()
 
 
 class Role(db.Model):

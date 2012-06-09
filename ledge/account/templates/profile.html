@@ -1,0 +1,14 @@
+{% extends "layout/master.html" %}
+
+{% block body %}
+
+    <h2>Home Page of {{ user.nickname }}</h2>
+
+    <div class="well">
+        <p>User ID: {{ user.id }}</p>
+        <p>Screen Name: {{ user.nickname }}</p>
+        <p>Gender: {{ user.gender.title() }}</p>
+        <p>Email: {{ user.email }}</p>
+    </div>
+
+{% endblock %}

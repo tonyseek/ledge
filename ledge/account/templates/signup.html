@@ -1,23 +1,22 @@
 {% extends "layout/master.html" %}
-
-
-{% macro render_field(field) %}
-    <div>
-        {{ field.label() }}
-        {{ field() }}
-    </div>
-{% endmacro %}
+{% import "helpers/form.html" as helper_form %}
 
 
 {% block body %}
-    <form action="{{ request.path }}" method="post">
-        {{ render_field(form.id) }}
-        {{ render_field(form.email) }}
-        {{ render_field(form.password) }}
-        {% for gender in form.gender %}
-            {{ render_field(gender) }}
-        {% endfor %}
-        {{ render_field(form.nickname) }}
-        {{ render_field(form.submit) }}
+    <form action="{{ request.path }}" method="post" class="form-horizontal">
+        <fieldset>
+            <legend>Sign Up</legend>
+            {{ helper_form.render_field(form.id) }}
+            {{ helper_form.render_field(form.email) }}
+            {{ helper_form.render_field(form.password) }}
+            {{ helper_form.render_field(form.gender) }}
+            {{ helper_form.render_field(form.nickname) }}
+        </fieldset>
+
+        <div class="form-actions">
+            {{ form.csrf_token() }}
+            {{ form.submit(class="btn btn-large btn-primary") }}
+            <input type="reset" class="btn btn-large" />
+        </div>
     </form>
 {% endblock %}
