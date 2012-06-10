@@ -1,0 +1,8 @@
+{%- macro flash(messages) %}
+    {%- for category, message in messages | default(get_flashed_messages(with_categories=True)) %}
+    <div class="alert alert-{{ category }}">
+        <a class="close" data-dismiss="alert" href="#">×</a>
+        {{ message }}
+    </div>
+    {%- endfor %}
+{%- endmacro %}

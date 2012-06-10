@@ -37,7 +37,6 @@ class SignUpService(object):
         #: while the user is actived
         if not self.user.active_token:
             raise TokenUsedError
-
         #: while the token is wrong
         if self.user.active_token.value != input_token:
             raise TokenWrongError

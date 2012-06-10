@@ -5,18 +5,15 @@
 {% block body %}
     <form action="{{ request.path }}" method="post" class="form-horizontal">
         <fieldset>
-            <legend>{{ _("Create a new account") | title }}</legend>
-            {{ helper_form.render_field(form.id) }}
-            {{ helper_form.render_field(form.email) }}
+            <legend>{{ _("Login") | title }}</legend>
+            {{ helper_form.render_field(form.login) }}
             {{ helper_form.render_field(form.password) }}
-            {{ helper_form.render_radios(form.gender) }}
-            {{ helper_form.render_field(form.nickname) }}
         </fieldset>
 
         <div class="form-actions">
             {{ form.csrf_token() }}
             {{ form.submit(class="btn btn-large btn-primary") }}
-            <a href="{{ url_for('account.login') }}" class="btn btn-large">{{ _('Login') }}</a>
+            <a href="{{ url_for('account.signup') }}" class="btn btn-large">{{ _('Sign Up') }}</a>
         </div>
     </form>
 {% endblock %}

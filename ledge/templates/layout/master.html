@@ -1,3 +1,4 @@
+{%- import "helpers/message.html" as helper_message %}
 <!doctype html>
 <html>
     <head>
@@ -22,28 +23,38 @@
                         <span class="brand">{{ _("manage your knowledge") }}</span>
                     </h1>
                     <ul class="nav">
-                        <li class="active"><a href="#">Home</a></li>
-                        <li><a href="#">Link</a></li>
-                        <li><a href="#">Link</a></li>
-                        <li><a href="#">Link</a></li>
+                        {%- for key, label, href in nav.navs %}
+                        <li{% if currentnav == key %} class="active"{% endif %}>
+                            <a href="{{ href }}">{{ label }}</a>
+                        </li>
+                        {%- endfor %}
                     </ul>
                     <ul class="nav pull-right">
-                        <li><a href="#">Link</a></li>
+                        <li><a href="javascript:void(0);">Help</a></li>
                         <li class="divider-vertical"></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ nav.get_menu_capital() }} <b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something else here</a></li>
+                            {%- for group in nav.menus | groupby("group") %}
+                                {%- if not loop.first %}
                                 <li class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
+                                {%- endif %}
+
+                                {%- for item in group.list if not item['item'][2] or item['item'][2]() %}
+                                {%- with label, href, assertion = item['item'] %}
+                                <li><a href="{{ href }}">{{ label }}</a></li>
+                                {%- endwith %}
+                                {%- else %}
+                                {%- endfor %}
+                            {%- endfor %}
                             </ul>
                         </li>
                     </ul>
                 </div>
             </div>
         </header>
+
+        {{- helper_message.flash() }}
 
         {%- block body %}
         {%- endblock %}

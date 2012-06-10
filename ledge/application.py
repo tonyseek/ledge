@@ -17,7 +17,6 @@ class Application(flask.Flask):
     LOG_FILE = "../app.log"
 
     BUILTIN_CONFIG = "application.cfg"
-    BUILTIN_BLUEPRINTS = ["ledge.account.app"]
 
     def __init__(self, import_name=__package__, *args, **kwargs):
         super(Application, self).__init__(import_name, *args, **kwargs)
@@ -39,9 +38,10 @@ class Application(flask.Flask):
 
     def _init_blueprints(self):
         """Register the built-in blueprints of the application."""
+        self.config.setdefault("BUILTIN_BLUEPRINTS", [])
         self.config.setdefault("BLUEPRINTS", [])
 
-        builtins = self.BUILTIN_BLUEPRINTS
+        builtins = self.config["BUILTIN_BLUEPRINTS"]
         others = self.config["BLUEPRINTS"]
 
         for name in itertools.chain(builtins, others):

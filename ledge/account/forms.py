@@ -11,7 +11,7 @@ from ledge.account.models import User
 
 
 class SignUpForm(Form):
-    """The form of signing up."""
+    """The form for signing up."""
 
     GENDER_CHOICES = [
             ("unknown", _(u"Private")),
@@ -26,3 +26,11 @@ class SignUpForm(Form):
             choices=GENDER_CHOICES, default="unknown")
     nickname = TextField(_("Screen Name"), [])
     submit = SubmitField(_("Sign Up"))
+
+
+class LoginForm(Form):
+    """The form for login."""
+
+    login = TextField(_("User Name or Email"), [required()])
+    password = PasswordField(_("Password"), [required()])
+    submit = SubmitField(_("Login"))

@@ -5,6 +5,8 @@ import uuid
 import hashlib
 import datetime
 
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from ledge.extensions import db
 from ledge.corelib.jsonize import JsonizableMixin
 from ledge.account.db import LowerIdMixin
@@ -79,12 +81,12 @@ class UserQuery(db.Query):
         return `None`, otherwise return the `models.User` model.
         """
         condition = ((User.email == email_or_username) |
-                     (User.username == email_or_username))
+                     (User.id == email_or_username))
         user = self.filter(condition).first()
         if not user:
-            raise UserNotFound
-        if user.check_password(password):
-            raise PasswordWrong
+            raise UserNotFoundError
+        if not user.check_password(password):
+            raise PasswordWrongError
         return user
 
 
@@ -123,6 +125,8 @@ class User(JsonizableMixin, LowerIdMixin, db.Model):
         input_password = self._hash_password(self.salt, input_password)
         return input_password == self.hashed_password
 
+    password = hybrid_property(lambda self: None, change_password)
+
     @staticmethod
     def _hash_password(salt, password):
         """Calculate the hashed value of password."""
@@ -145,9 +149,9 @@ class ActiveToken(db.Model):
 # Exceptions
 # ----------
 
-class UserNotFound(Exception):
+class UserNotFoundError(Exception):
     pass
 
 
-class PasswordWrong(Exception):
+class PasswordWrongError(Exception):
     pass

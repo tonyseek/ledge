@@ -13,15 +13,21 @@ from rbac.acl import Registry
 from rbac.proxy import RegistryProxy
 from rbac.context import IdentityContext
 
-import ledge.assets
+from ledge.assets import install as install_assets
+from ledge.corelib.navigation import Navigation
 
 
 db = SQLAlchemy()
 babel = Babel()
 mail = Mail()
 assets = Environment()
+
+#: role based access control
 acl = RegistryProxy(Registry())
 identity = IdentityContext(acl)
+
+#: navigation registry
+nav = Navigation()
 
 
 def configure_extensions(app):
@@ -30,7 +36,8 @@ def configure_extensions(app):
     babel.init_app(app)
     mail.init_app(app)
     assets.init_app(app)
-    ledge.assets.install(assets)
+    install_assets(assets)
+    nav.init_app(app)
 
     @babel.localeselector
     def get_locale():
