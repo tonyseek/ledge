@@ -16,10 +16,12 @@ class Application(flask.Flask):
     CONFIG_ENV = "LEDGE_CONFIG"
     LOG_FILE = "../app.log"
 
+    BUILTIN_CONFIG = "application.cfg"
     BUILTIN_BLUEPRINTS = ["ledge.account.app"]
 
     def __init__(self, import_name=__package__, *args, **kwargs):
         super(Application, self).__init__(import_name, *args, **kwargs)
+        self.config.from_pyfile(self.get_full_path(self.BUILTIN_CONFIG))
         self.config.from_envvar(self.CONFIG_ENV)
         self._init_extensions()
         self._init_logging()
