@@ -9,6 +9,13 @@
         <p>Screen Name: {{ user.nickname }}</p>
         <p>Gender: {{ user.gender.title() }}</p>
         <p>Email: {{ user.email }}</p>
+        <p>Roles:
+            {%- for role in user.roles %}
+                <span class="label">{{ role }}</span>
+            {%- else %}
+                Nothing
+            {%- endfor %}
+        </p>
     </div>
 
 {% endblock %}

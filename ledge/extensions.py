@@ -8,6 +8,10 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.babel import Babel
 from flask.ext.mail import Mail
 from flask.ext.assets import Environment, ManageAssets
+from flask.ext.script import prompt_bool
+from rbac.acl import Registry
+from rbac.proxy import RegistryProxy
+from rbac.context import IdentityContext
 
 import ledge.assets
 
@@ -16,6 +20,8 @@ db = SQLAlchemy()
 babel = Babel()
 mail = Mail()
 assets = Environment()
+acl = RegistryProxy(Registry())
+identity = IdentityContext(acl)
 
 
 def configure_extensions(app):
@@ -40,3 +46,14 @@ def configure_extensions(app):
 
 def configure_manager(manager):
     manager.add_command("assets", ManageAssets(assets))
+
+    @manager.command
+    def create_db():
+        """Creates tables in the database with existed schema."""
+        db.create_all()
+
+    @manager.command
+    def drop_db():
+        """Drop all tables in the database."""
+        if prompt_bool("Confirm to drop all table from database"):
+            db.drop_all()

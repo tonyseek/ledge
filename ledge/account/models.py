@@ -13,6 +13,49 @@ from ledge.account.db import LowerIdMixin
 current_datetime = lambda: datetime.datetime.utcnow()
 
 
+# ---------
+# User Role
+# ---------
+
+class UserRole(db.Model):
+    """The middle table for users having roles."""
+
+    user_id = db.Column(db.ForeignKey("user.id"), primary_key=True)
+    role_id = db.Column(db.ForeignKey("role.id"), primary_key=True)
+    created = db.Column(db.DateTime, nullable=False, default=current_datetime)
+
+
+class RoleQuery(db.Query):
+    """Query Handler for `Role` model."""
+
+    def create(self, role_id, parent_id=None, screen_name=None):
+        screen_name = screen_name or role_id
+        role = User(id=role_id, parent_id=parent_id, screen_name=screen_name)
+        db.session.add(role)
+        return role
+
+    def get_or_create(self, role_id, *args, **kwargs):
+        return self.get(role_id) or self.create(role_id, *args, **kwargs)
+
+    __call__ = get_or_create
+
+
+class Role(LowerIdMixin, db.Model):
+    """The role of the user."""
+
+    query_class = RoleQuery
+    _id = db.Column("id", db.String(20), primary_key=True)
+    parent_id = db.Column(db.ForeignKey(_id))
+    screen_name = db.Column(db.Unicode(20))
+
+    def __unicode__(self):
+        return self.screen_name or self.id
+
+
+# ------------
+# User Account
+# ------------
+
 class UserQuery(db.Query):
     """Query Handler of `User` model."""
 
@@ -46,6 +89,7 @@ class User(JsonizableMixin, LowerIdMixin, db.Model):
     salt = db.Column(db.String(32), nullable=False)
     hashed_password = db.Column(db.String(64), nullable=False)
     created = db.Column(db.DateTime, nullable=False, default=current_datetime)
+    roles = db.relationship(Role, secondary=UserRole.__table__)
 
     def __init__(self, **data):
         password = data.pop("password", "")
@@ -72,14 +116,6 @@ class User(JsonizableMixin, LowerIdMixin, db.Model):
         hashed = hashlib.sha256()
         hashed.update("<%s|%s>" % (salt, password))
         return hashed.hexdigest()
-
-
-class Role(LowerIdMixin, db.Model):
-    """The role of the user."""
-
-    _id = db.Column("id", db.String(20), primary_key=True)
-    parent_id = db.Column(db.ForeignKey(id))
-    screen_name = db.Column(db.Unicode(20))
 
 
 # ----------
