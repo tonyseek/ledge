@@ -25,19 +25,24 @@ class UserRole(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=current_datetime)
 
 
+class RoleClosure(db.Model):
+    """The role's inheritance relationship to itself."""
+
+    parent_id = db.Column(db.ForeignKey("role.id"), primary_key=True)
+    child_id = db.Column(db.ForeignKey("role.id"), primary_key=True)
+
+
 class RoleQuery(db.Query):
     """Query Handler for `Role` model."""
 
-    def create(self, role_id, parent_id=None, screen_name=None):
-        screen_name = screen_name or role_id
-        role = User(id=role_id, parent_id=parent_id, screen_name=screen_name)
+    def create(self, role_id, parents=[], screen_name=None):
+        role = Role(id=role_id, parents=list(parents),
+                screen_name=screen_name)
         db.session.add(role)
         return role
 
-    def get_or_create(self, role_id, *args, **kwargs):
+    def __call__(self, role_id, *args, **kwargs):
         return self.get(role_id) or self.create(role_id, *args, **kwargs)
-
-    __call__ = get_or_create
 
 
 class Role(LowerIdMixin, db.Model):
@@ -45,11 +50,19 @@ class Role(LowerIdMixin, db.Model):
 
     query_class = RoleQuery
     _id = db.Column("id", db.String(20), primary_key=True)
-    parent_id = db.Column(db.ForeignKey(_id))
+    parents = db.relationship("Role", secondary=RoleClosure.__table__,
+            primaryjoin=(RoleClosure.child_id == _id),
+            secondaryjoin=(RoleClosure.parent_id == _id))
     screen_name = db.Column(db.Unicode(20))
 
     def __unicode__(self):
         return self.screen_name or self.id
+
+    def __eq__(self, other):
+        return hasattr(other, "id") and self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 # ------------
@@ -116,6 +129,16 @@ class User(JsonizableMixin, LowerIdMixin, db.Model):
         hashed = hashlib.sha256()
         hashed.update("<%s|%s>" % (salt, password))
         return hashed.hexdigest()
+
+
+class ActiveToken(db.Model):
+    """The active token of new account."""
+
+    user_id = db.Column(db.ForeignKey(User.id), primary_key=True)
+    user = db.relationship(User, lazy="joined", uselist=False,
+            backref=db.backref("active_token", lazy="select", uselist=False))
+    value = db.Column(db.String(32), nullable=False,
+            default=lambda: uuid.uuid4().hex)
 
 
 # ----------

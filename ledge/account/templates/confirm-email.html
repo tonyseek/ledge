@@ -1,0 +1,12 @@
+{%- set url = url_for("account.confirm", id=user.id, token=user.active_token.value, _external=True) -%}
+
+{%- macro link() -%}
+    <a href="{{ url }}">{{ _("this link") }}</a>
+{%- endmacro -%}
+
+<p>{{ _("Welcome to join ledge!") }}</p>
+<p>{{ _("Please click %(link)s to active your account.", link=link()) | safe }}</p>
+<p>{{ _("If you could not do that, please copy this URL to your browser's address bar.") }}</p>
+<p>
+    <pre>{{ url }}</pre>
+</p>
