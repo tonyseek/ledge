@@ -3,6 +3,7 @@
 
 import itertools
 
+from flask import request
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.babel import Babel
 from flask.ext.mail import Mail
@@ -24,6 +25,11 @@ def configure_extensions(app):
     mail.init_app(app)
     assets.init_app(app)
     ledge.assets.install(assets)
+
+    @babel.localeselector
+    def get_locale():
+        accept_languages = app.config.get("ACCEPT_LANGUAGES", ["zh", "en"])
+        return request.accept_languages.best_match(accept_languages)
 
     @app.context_processor
     def assets_variables():

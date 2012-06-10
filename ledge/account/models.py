@@ -7,6 +7,7 @@ import datetime
 
 from ledge.extensions import db
 from ledge.corelib.jsonize import JsonizableMixin
+from ledge.account.db import LowerIdMixin
 
 
 current_datetime = lambda: datetime.datetime.utcnow()
@@ -15,16 +16,13 @@ current_datetime = lambda: datetime.datetime.utcnow()
 class UserQuery(db.Query):
     """Query Handler of `User` model."""
 
-    def get(self, id):
-        return super(UserQuery, self).get(id.lower())
-
     def authenticate(self, email_or_username, password):
         """Authenicate by email/username and password.
 
         If email/username isn't exist or password is wrong, this method would
         return `None`, otherwise return the `models.User` model.
         """
-        condition = ((User.email == email_or_username.lower()) |
+        condition = ((User.email == email_or_username) |
                      (User.username == email_or_username))
         user = self.filter(condition).first()
         if not user:
@@ -34,17 +32,17 @@ class UserQuery(db.Query):
         return user
 
 
-class User(JsonizableMixin, db.Model):
+class User(JsonizableMixin, LowerIdMixin, db.Model):
     """The account of the user."""
 
     query_class = UserQuery
     JSONIZE_ATTRS = ("id", "nickname", "gender", "created")
     GENDER_ENUM = ("male", "female", "unknown")
 
-    id = db.Column(db.String(20), primary_key=True)
-    email = db.Column(db.String(64), unique=True)
+    _id = db.Column("id", db.String(20), primary_key=True, nullable=False)
+    email = db.Column(db.String(64), unique=True, nullable=False)
     nickname = db.Column(db.Unicode(20))
-    gender = db.Column(db.Enum(name="gender", *GENDER_ENUM), default="unknown")
+    gender = db.Column(db.Enum(name="gender", *GENDER_ENUM), nullable=False)
     salt = db.Column(db.String(32), nullable=False)
     hashed_password = db.Column(db.String(64), nullable=False)
     created = db.Column(db.DateTime, nullable=False, default=current_datetime)
@@ -75,15 +73,11 @@ class User(JsonizableMixin, db.Model):
         hashed.update("<%s|%s>" % (salt, password))
         return hashed.hexdigest()
 
-    @db.validates("id")
-    def validate_id(self, key, value):
-        return value.lower()
 
-
-class Role(db.Model):
+class Role(LowerIdMixin, db.Model):
     """The role of the user."""
 
-    id = db.Column(db.String(20), primary_key=True)
+    _id = db.Column("id", db.String(20), primary_key=True)
     parent_id = db.Column(db.ForeignKey(id))
     screen_name = db.Column(db.Unicode(20))
 

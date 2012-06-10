@@ -5,7 +5,7 @@
 {% block body %}
     <form action="{{ request.path }}" method="post" class="form-horizontal">
         <fieldset>
-            <legend>Sign Up</legend>
+            <legend>{{ _("Create a new account") | title }}</legend>
             {{ helper_form.render_field(form.id) }}
             {{ helper_form.render_field(form.email) }}
             {{ helper_form.render_field(form.password) }}
@@ -16,7 +16,7 @@
         <div class="form-actions">
             {{ form.csrf_token() }}
             {{ form.submit(class="btn btn-large btn-primary") }}
-            <input type="reset" class="btn btn-large" />
+            <input type="reset" class="btn btn-large" value="{{ _('Reset') }}" />
         </div>
     </form>
 {% endblock %}

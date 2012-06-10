@@ -4,6 +4,7 @@
 import flask.ext.wtf
 import flask.ext.wtf.form
 import wtforms.ext.i18n.form
+from flask.ext.babel import lazy_gettext as _
 
 
 # ---------
@@ -25,14 +26,11 @@ def apply_monkey_patch():
 # Validators
 # ----------
 
-def unique(column):
+def unique(model_class, column):
     """A validator to ensure the record is unique in the database."""
-    model_class = column.class_
-
     def validate_unique(form, field):
         if model_class.query.filter(column == field.data).count() == 0:
             return True
-        message = field.gettext(u"The %s has been used.") % field.label.text
+        message = _(u"The %(field)s has been used.", field=field.label.text)
         raise flask.ext.wtf.ValidationError(message)
-
     return validate_unique
