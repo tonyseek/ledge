@@ -24,7 +24,7 @@ class LowerIdMixin(object):
 
     @id.setter
     def __set_id(self, value):
-        self._id = unicode(value).lower()
+        setattr(self, self.ID_ATTR, unicode(value).lower())
 
     @id.comparator
     def __compare_id(cls):

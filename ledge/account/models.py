@@ -9,7 +9,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from ledge.extensions import db
 from ledge.corelib.mixins.jsonize import Jsonizable
-from ledge.account.db import LowerIdMixin
+from ledge.account.mixins import LowerIdMixin
 
 
 current_datetime = lambda: datetime.datetime.utcnow()

@@ -42,7 +42,7 @@ class SignUpService(object):
             raise TokenWrongError
 
         #: active the user and delete the used token
-        self.user.roles.append(Role.query.get("actived"))
+        self.user.roles.append(Role.query("actived"))
         db.session.delete(self.user.active_token)
         db.session.commit()
 

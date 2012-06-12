@@ -6,22 +6,9 @@ import functools
 from flask import g, session, url_for, abort
 from flask.ext.babel import gettext as _
 
-from ledge.extensions import acl, identity, db, nav
+from ledge.extensions import acl, identity, nav
 from ledge.account import app
 from ledge.account.models import User, Role
-
-
-# -----------
-# Basic Roles
-# -----------
-
-@app.before_app_first_request
-def create_basic_roles():
-    """Create basic roles and store them into database."""
-    # TODO: refactor it to a configuration
-    # everyone = Role.query("everyone", screen_name="builtin:everyone")
-    # Role.query("actived", [everyone], screen_name="builtin:actived")
-    # db.session.commit()
 
 
 # --------------
