@@ -6,7 +6,8 @@ import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from ledge.extensions import db
-from ledge.corelib import mixins
+from ledge.corelib.mixins.comment import Commentable
+from ledge.corelib.utils import format
 from ledge.account.models import User
 
 
@@ -60,14 +61,16 @@ class Note(db.Model):
     def latest_modified(self):
         return self.last_version.created
 
+    def get_version(self, hex_id):
+        """Get a special version by it's hex-style created datetime."""
+        try:
+            created = format.timestamp_to_datetime(hex_id, from_hex=True)
+        except ValueError:
+            return None
+        return self.versions.filter_by(note=self, created=created).one()
 
-class NoteVersionQuery(db.Query):
-    """The query handler of the NoteVersion."""
 
-    pass
-
-
-class NoteVersion(mixins.Commentable, db.Model):
+class NoteVersion(Commentable, db.Model):
     """The version of the note."""
 
     id = db.Column(db.Integer, primary_key=True)
@@ -80,3 +83,7 @@ class NoteVersion(mixins.Commentable, db.Model):
     __mapper_args__ = {'order_by': created.desc()}
     __commentable__ = {'owner_class': User, 'owner_id': User.primary_key,
             'subject_id': id}
+
+    @property
+    def hex_id(self):
+        return format.datetime_to_timestamp(self.created)

@@ -34,7 +34,7 @@ def register_type_converter(from_type):
     return decorator
 
 
-class JsonizableMixin(object):
+class Jsonizable(object):
     """Implement to_json method to a model.
 
     While including this mix-in class, the subject class should implement the
@@ -42,7 +42,7 @@ class JsonizableMixin(object):
     be serialized.
 
     Example:
-        >>> class MyModel(JsonizableMixin, Base):
+        >>> class MyModel(Jsonizable, Base):
         ...     JSONIZE_ATTRS = ["name", "age"]
         ...
         ...     def __init__(self, name, age):
@@ -62,7 +62,7 @@ class JsonizableMixin(object):
     def to_json(self):
         """Generate a dictionary for json serialize."""
         # update the subclasses set
-        jsonizable_classes.update(JsonizableMixin.__subclasses__())
+        jsonizable_classes.update(Jsonizable.__subclasses__())
         # serialize to dictionary
         serialized = {}
         for attr in self.JSONIZE_ATTRS:

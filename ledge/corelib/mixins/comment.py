@@ -9,6 +9,7 @@ from ledge.extensions import db
 
 
 class BaseComment(db.Model):
+    """The base class of the comment model."""
 
     __abstract__ = True
     __commentable__ = {'owner_id': None, 'subject_id': None,
@@ -16,6 +17,7 @@ class BaseComment(db.Model):
     __mapper_args__ = {'order_by': "created.desc()"}
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
+    content = db.Column(db.Text, nullable=False)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     @declared_attr
@@ -40,6 +42,21 @@ class BaseComment(db.Model):
 
 
 class Commentable(db.Model):
+    """A mixin class to make subject could be commented.
+
+    Example:
+    >>> class Subject(mixins.comment.Commentable, db.Model):
+    ...     subject_id = db.Column(db.Ingeger, primary_key=True)
+    ...
+    ...     __commentable__ = {'owner_class': User, 'owner_id': User.id,
+                'subject_id': subject_id}
+    >>>
+    >>> subject = Subject()
+    >>> comment = subject.add_comment("My first comment.", current_user())
+    >>>
+    >>> comment in subject.comments
+    True
+    """
 
     __abstract__ = True
     __commentable__ = {'owner_class': None, 'owner_id': None,
@@ -60,7 +77,13 @@ class Commentable(db.Model):
 
         #: assign the comment class to the subject class
         setattr(cls, class_name, comment_class)
+        setattr(cls, "comment_class", comment_class)
 
         #: create and return the relationship to the comment
         return db.relationship(comment_class, lazy="dynamic",
                 backref=db.backref("subject", lazy="joined", uselist=False))
+
+    def add_comment(self, content, owner):
+        comment = self.comment_class(subject=self, owner=owner)
+        self.comments.append(comment)
+        return comment
