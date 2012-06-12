@@ -8,7 +8,7 @@ import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from ledge.extensions import db
-from ledge.corelib.jsonize import JsonizableMixin
+from ledge.corelib.mixins.jsonize import Jsonizable
 from ledge.account.db import LowerIdMixin
 
 
@@ -51,10 +51,10 @@ class Role(LowerIdMixin, db.Model):
     """The role of the user."""
 
     query_class = RoleQuery
-    _id = db.Column("id", db.String(20), primary_key=True)
+    primary_key = db.Column("id", db.String(20), primary_key=True)
     parents = db.relationship("Role", secondary=RoleClosure.__table__,
-            primaryjoin=(RoleClosure.child_id == _id),
-            secondaryjoin=(RoleClosure.parent_id == _id))
+            primaryjoin=(RoleClosure.child_id == primary_key),
+            secondaryjoin=(RoleClosure.parent_id == primary_key))
     screen_name = db.Column(db.Unicode(20))
 
     def __unicode__(self):
@@ -90,14 +90,14 @@ class UserQuery(db.Query):
         return user
 
 
-class User(JsonizableMixin, LowerIdMixin, db.Model):
+class User(Jsonizable, LowerIdMixin, db.Model):
     """The account of the user."""
 
     query_class = UserQuery
     JSONIZE_ATTRS = ("id", "nickname", "gender", "created")
     GENDER_ENUM = ("male", "female", "unknown")
 
-    _id = db.Column("id", db.String(20), primary_key=True, nullable=False)
+    primary_key = db.Column("id", db.String(20), primary_key=True)
     email = db.Column(db.String(64), unique=True, nullable=False)
     nickname = db.Column(db.Unicode(20))
     gender = db.Column(db.Enum(name="gender", *GENDER_ENUM), nullable=False)

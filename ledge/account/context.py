@@ -18,9 +18,10 @@ from ledge.account.models import User, Role
 @app.before_app_first_request
 def create_basic_roles():
     """Create basic roles and store them into database."""
-    everyone = Role.query("everyone", screen_name="builtin:everyone")
-    Role.query("actived", [everyone], screen_name="builtin:actived")
-    db.session.commit()
+    # TODO: refactor it to a configuration
+    # everyone = Role.query("everyone", screen_name="builtin:everyone")
+    # Role.query("actived", [everyone], screen_name="builtin:actived")
+    # db.session.commit()
 
 
 # --------------
@@ -47,32 +48,38 @@ def reload_all_roles():
         acl.add_role(role.id, [parent.id for parent in role.parents])
 
 
-@app.before_app_first_request
-def init_nav():
-    """Initilize the global layout navigation."""
-    #: assertion functions
-    without_login = lambda: not current_user()
-    with_login = lambda: bool(current_user())
-
-    #: set context variable
-    nav.get_current_user = current_user
-    nav.get_menu_capital = lambda: current_user().nickname \
-            if current_user() else _("My Account")
-
-    #: register session menu
-    nav.add_menu_items(
-        ("session", _("Login"), url_for("account.login"), without_login),
-        ("session", _("Sign Up"), url_for("account.signup"), without_login),
-        ("session", _("Logout"), url_for("account.logout"), with_login),
-        ("resource", _("My Home"),
-                url_for("account.person", id=current_user().id), with_login)
-    )
-
-
 @identity.set_roles_loader
 def current_roles():
     for role in getattr(current_user(), "roles", []):
         yield role.id
+
+
+@app.before_app_first_request
+def init_navigation():
+    """Initilize the global layout navigation."""
+    #: assertion functions
+    logout = lambda: not current_user()
+    login = lambda: current_user()
+
+    #: lazy url generate
+    person_home_url = lambda: url_for("account.person", id=current_user().id)
+
+    #: build session menu items
+    session_menu_items = [
+            (_("Login"), url_for("account.login"), logout),
+            (_("Sign Up"), url_for("account.signup"), logout),
+            (_("Logout"), url_for("account.logout"), login)]
+
+    #: build account menu items
+    account_menu_items = [(_("My Home"), person_home_url, login)]
+
+    #: register session menu
+    for label, url, assertion in session_menu_items:
+        nav.add_menu_item("session", label, url, assertion)
+
+    #: register account menu
+    for label, url, assertion in account_menu_items:
+        nav.add_menu_item("account", label, url, assertion)
 
 
 # --------------
@@ -92,7 +99,7 @@ def session_logout():
     reload_current_user()
 
 
-def require_login(wrapped):
+def authenticated(wrapped):
     """A decorator to give a HTTP 401 to unauthenticated request."""
     def wrapper(*args, **kwargs):
         if not current_user():

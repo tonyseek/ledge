@@ -10,7 +10,7 @@ from ledge.account.models import User, UserNotFoundError, PasswordWrongError
 from ledge.account.services import (SignUpService, TokenUsedError,
         TokenWrongError)
 from ledge.account.forms import SignUpForm, LoginForm
-from ledge.account.context import session_login, session_logout, require_login
+from ledge.account.context import session_login, session_logout, authenticated
 
 
 # -------------
@@ -108,7 +108,7 @@ class LoginView(MethodView):
 
 
 @app.route("/logout")
-@require_login
+@authenticated
 def logout():
     session_logout()
     return redirect(url_for("master.home"))

@@ -14,6 +14,7 @@ from rbac.proxy import RegistryProxy
 from rbac.context import IdentityContext
 
 from ledge.assets import install as install_assets
+from ledge.corelib import utils
 from ledge.corelib.navigation import Navigation
 
 
@@ -21,12 +22,8 @@ db = SQLAlchemy()
 babel = Babel()
 mail = Mail()
 assets = Environment()
-
-#: role based access control
 acl = RegistryProxy(Registry())
 identity = IdentityContext(acl)
-
-#: navigation registry
 nav = Navigation()
 
 
@@ -49,6 +46,10 @@ def configure_extensions(app):
         get_namespace = lambda name: name.split(".", 1)[0]
         named_assets = itertools.groupby(assets._named_bundles, get_namespace)
         return {'assets': {k: sorted(v) for k, v in named_assets}}
+
+    @app.context_processor
+    def context_variables():
+        return {'identity': identity, 'utils': utils}
 
 
 def configure_manager(manager):

@@ -16,7 +16,7 @@ class LowerIdComparator(Comparator):
 class LowerIdMixin(object):
     """Let the id property could be compared in lower-case."""
 
-    ID_ATTR = "_id"
+    ID_ATTR = "primary_key"
 
     @hybrid_property
     def id(self):

@@ -18,33 +18,41 @@
         <header>
             <div class="navbar">
                 <div class="navbar-inner container">
+                    {#- capital #}
                     <h1>
                         <a class="brand" href="/">Ledge</a>
                         <span class="brand">{{ _("manage your knowledge") }}</span>
                     </h1>
+
+                    {#- navigation items #}
                     <ul class="nav">
-                        {%- for key, label, href in nav.navs %}
-                        <li{% if currentnav == key %} class="active"{% endif %}>
-                            <a href="{{ href }}">{{ label }}</a>
+                        {%- for item in navigation.items %}
+                        <li{% if currentnav == item.key %} class="active"{% endif %}>
+                            <a href="{{ item.href }}">{{ item.label }}</a>
                         </li>
                         {%- endfor %}
                     </ul>
+
+                    {#- navigation right #}
                     <ul class="nav pull-right">
                         <li><a href="javascript:void(0);">Help</a></li>
                         <li class="divider-vertical"></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ nav.get_menu_capital() }} <b class="caret"></b></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                {%- if g.current_user %}
+                                {{ _("My Account") }}
+                                {%- else %}
+                                {{ _("Logged out") }}
+                                {% endif %}
+                                <b class="caret"></b>
+                            </a>
                             <ul class="dropdown-menu">
-                            {%- for group in nav.menus | groupby("group") %}
-                                {%- if not loop.first %}
+                            {%- for group in navigation.menu_items | groupby("group") %}
+                                {%- if group.list and not loop.first %}
                                 <li class="divider"></li>
                                 {%- endif %}
-
-                                {%- for item in group.list if not item['item'][2] or item['item'][2]() %}
-                                {%- with label, href, assertion = item['item'] %}
-                                <li><a href="{{ href }}">{{ label }}</a></li>
-                                {%- endwith %}
-                                {%- else %}
+                                {%- for item in group.list %}
+                                <li><a href="{{ item.href }}">{{ item.label }}</a></li>
                                 {%- endfor %}
                             {%- endfor %}
                             </ul>
