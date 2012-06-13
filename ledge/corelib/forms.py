@@ -29,8 +29,13 @@ def apply_monkey_patch():
 def unique(model_class, column):
     """A validator to ensure the record is unique in the database."""
     def validate_unique(form, field):
+        #: without any change
+        if field.object_data == field.data:
+            return True
+        #: it's not repeated
         if model_class.query.filter(column == field.data).count() == 0:
             return True
+        #: not unique, the exception will be raised
         message = _(u"The %(field)s has been used.", field=field.label.text)
         raise flask.ext.wtf.ValidationError(message)
     return validate_unique
