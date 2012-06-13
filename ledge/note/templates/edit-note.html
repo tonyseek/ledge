@@ -1,0 +1,51 @@
+{% extends "layout/master.html" %}
+{% import "helpers/form.html" as helper_form %}
+
+
+{%- block scripts %}
+        <script type="text/javascript">
+            $(function() {
+                ledge.useTopicLabel({
+                    'form': "#edit-note-form",
+                    'select': ".select-topics",
+                    'container': "#topic-container",
+                    'inputbox': "#add-topic-text",
+                    'button': "#add-topic-btn"
+                });
+            });
+        </script>
+{%- endblock %}
+
+
+{%- block body %}
+        <form action="{{ request.path }}" method="post" class="form-horizontal" id="edit-note-form">
+            <fieldset>
+                <legend>
+                    {%- if note is defined %}
+                        {{ _("Edit the note %(title)s", title=note.title) | title }}
+                    {%- else %}
+                        {{ _("Create a new note") | title }}
+                    {%- endif %}
+                </legend>
+                {{ helper_form.render_field(form.title, class="input-xxlarge") }}
+                {{ helper_form.render_field(form.content, class="input-xxlarge", rows=5) }}
+                {%- call helper_form.render_field(form.topics) %}
+                    {{ form.topics(class="select-topics") }}
+                    <input type="text" id="add-topic-text" class="related-autocomplete input-xlarge" />
+                    <input type="button" value="{{ _('add topic') | title }}" id="add-topic-btn" class="btn" />
+                    <div id="topic-container"></div>
+                {%- endcall %}
+                {%- if note is defined %}
+                {{ helper_form.render_field(form.is_small_changed) }}
+                {%- endif %}
+            </fieldset>
+
+            <div class="form-actions">
+                {{ form.csrf_token() }}
+                {{ form.submit(class="btn btn-large btn-primary") }}
+                {%- if note is defined %}
+                <a href="{{ url_for('note.note', id=note.id) }}" class="btn btn-large">{{ _("View this note") }}</a>
+                {%- endif %}
+            </div>
+        </form>
+{%- endblock %}

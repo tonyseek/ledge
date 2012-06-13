@@ -42,18 +42,24 @@ class Topic(Jsonizable, db.Model):
 # Note and Version
 # ----------------
 
+class NoteTopic(db.Model):
+    """The relationship between the note to the topic."""
+
+    note_id = db.Column(db.ForeignKey("note.id"), primary_key=True)
+    topic_id = db.Column(db.ForeignKey("topic.id"), primary_key=True)
+
+
 class Note(db.Model):
     """The note."""
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Unicode(20), nullable=False)
-    Topic_id = db.Column(db.ForeignKey(Topic.id), nullable=False)
+    topics = db.relationship(Topic, secondary=NoteTopic.__table__,
+            primaryjoin=(NoteTopic.note_id == id),
+            secondaryjoin=(NoteTopic.topic_id == Topic.id))
     owner_id = db.Column(db.ForeignKey(User.id), nullable=False)
-    Topic = db.relationship(Topic, lazy="joined", uselist=False,
-            primaryjoin=(Topic.id == Topic_id))
     owner = db.relationship(User, lazy="joined", uselist=False,
             primaryjoin=(User.primary_key == owner_id))
-    created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     @hybrid_property
     def latest_version(self):
@@ -79,6 +85,7 @@ class NoteVersion(Commentable, db.Model):
     note_id = db.Column(db.ForeignKey(Note.id), nullable=False)
     note = db.relationship(Note, lazy="joined", uselist=False,
             backref=db.backref("versions", lazy="dynamic"))
+    content = db.Column(db.Text, nullable=False)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow,
             nullable=False)
 
@@ -88,4 +95,4 @@ class NoteVersion(Commentable, db.Model):
 
     @property
     def hex_id(self):
-        return format.datetime_to_timestamp(self.created)
+        return format.datetime_to_timestamp(self.created, to_hex=True)

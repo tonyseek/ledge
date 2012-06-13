@@ -5,73 +5,12 @@
 {%- block scripts %}
         <script type="text/javascript">
             $(function() {
-                var addRelatedTopicLabel = function(topicName) {
-                    // validate input
-                    if (!topicName) {
-                        // avoid empty
-                        alert("请输入话题名称"); // TODO
-                        return false;
-                    } else if (topics.indexOf(topicName) === -1) {
-                        // avoid invalid
-                        alert("话题\"" + topicName + "\" 不存在"); // TODO
-                        return false;
-                    }
-
-                    var removeBtn = $('<a>').html("&times;")
-                            .attr("class", "remove-topic-btn close")
-                            .attr("href", "#");
-                    var label = $("<span>").text(topicName)
-                            .attr("class", "label label-topic")
-                            .attr("data-topic-name", topicName)
-                            .append(removeBtn);
-
-                    // append to topics container
-                    $("#related-container").append(label);
-                    // clear input box
-                    $("#add-related-text").val("");
-
-                    // bind click event of the remove button
-                    removeBtn.click(function() {
-                        $(this).parent().fadeOut(function() {
-                            $(this).remove();
-                        });
-                        return false;
-                    });
-                };
-
-
-                // get the autocomplete list
-                var topics = [];
-                $("select.related-topics option").each(function() {
-                    topics.push($(this).text());
-                });
-                // turn on the autocomplete
-                $(".related-autocomplete").typeahead({source: topics});
-
-                // the click event of adding a related topic
-                $("#add-related-btn").click(function() {
-                    addRelatedTopicLabel($("#add-related-text").val())
-                });
-
-                var selectField = $(".related-topics");
-
-                selectField.children().each(function () {
-                    if (typeof $(this).attr("selected") !== "undefined") {
-                        addRelatedTopicLabel($(this).text());
-                    }
-                });
-
-                // before submit
-                $("#add-topic-form").submit(function () {
-                    selectField.children().removeAttr("selected");
-                    $("#related-container span").each(function() {
-                        var value = $(this).attr("data-topic-name");
-                        selectField.children().each(function() {
-                            if (value === $(this).text()) {
-                                $(this).attr("selected", "selected");
-                            }
-                        });
-                    });
+                ledge.useTopicLabel({
+                    'form': "#add-topic-form",
+                    'select': "select.related-topics",
+                    'container': "#related-container",
+                    'inputbox': "#add-related-text",
+                    'button': "#add-related-btn"
                 });
             });
         </script>
@@ -81,7 +20,13 @@
 {%- block body %}
         <form action="{{ request.path }}" method="post" class="form-horizontal" id="add-topic-form">
             <fieldset>
-                <legend>{{ _("Create a new topic") | title }}</legend>
+                <legend>
+                    {% if topic is defined %}
+                        {{- _("Edit the topic %(name)s", name=topic.name) -}}
+                    {% else %}
+                        {{- _("Create a new topic") | title -}}
+                    {% endif %}
+                </legend>
                 {{ helper_form.render_field(form.name, class="input-xlarge") }}
                 {{ helper_form.render_field(form.description, class="input-xlarge", rows=5) }}
                 {%- call helper_form.render_field(form.related_topics) %}

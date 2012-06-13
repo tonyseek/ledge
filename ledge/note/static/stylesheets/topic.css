@@ -1,4 +1,4 @@
-select.related-topics {
+select.related-topics, select.select-topics {
     display: none;
 }
 
@@ -18,7 +18,7 @@ select.related-topics {
     height: inherit;
 }
 
-#related-container {
+#related-container, #topic-container {
     margin-top: 20px;
     border: 1px dashed #ccc;
     background-color: #fafafa;

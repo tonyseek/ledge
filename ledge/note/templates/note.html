@@ -1,0 +1,69 @@
+{% extends "layout/master.html" %}
+
+
+{% block body %}
+    <div class="contaner">
+        <div class="row">
+            <div class="span2">
+                {% for t in note.topics %}
+                <a class="label label-topic" href="{{ url_for('note.topic', id=t.id) }}">{{ t.name }}</a>
+                {% endfor %}
+            </div>
+            <div class="span10">
+                {#- the edit and create button #}
+                <div class="pull-right">
+                    {%- if note.latest_version.id == version.id %}
+                    <a href="{{ url_for('note.edit_note', id=note.id) }}" class="btn">{{ _("Edit this note") }}</a>
+                    {%- endif %}
+                    <a href="{{ url_for('note.new_note') }}" class="btn">{{ _("Create new note") }}</a>
+                </div>
+
+                {#- the note title #}
+                {%- if version.id == note.latest_version.id %}
+                <span class="label label-info pull-left">{{ _("LATEST") }}</span>
+                {%- endif %}
+                <h2>{{ _("Note - %(title)s", title=note.title) }}</h2>
+
+                {#- the signature and the timestamp #}
+                <ul class="nav nav-pills">
+                    <li>
+                        <a href="{{ url_for('account.person', id=note.owner.id) }}">
+                            {{- _("Author: %(name)s", name=note.owner.nickname) -}}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript: void(0);">
+                            {{- _("Latest updated at: %(datetime)s", datetime=version.created | datetimeformat ) -}}
+                        </a>
+                    </li>
+                    <li class="dropdown" id="versions">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#versions">
+                            {{- _("Count Versions: %(count)s", count=note.versions.count()) -}} <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                        {%- for v in note.versions %}
+                            {%- if v.id == version.id %}
+                            <li class="divider"></li>
+                            {%- endif %}
+                            <li>
+                                <a href="{{ url_for('note.note', id=note.id, hex_id=v.hex_id) }}">
+                                    {{- v.created | datetimeformat -}}
+                                </a>
+                            </li>
+                            {%- if v.id == version.id %}
+                            <li class="divider"></li>
+                            {%- endif %}
+                        {%- endfor %}
+                        </ul>
+                    </li>
+                </ul>
+
+                {#- the version content #}
+                <div class="content">
+                    {{ render_to_html("markdown", version.content) | safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
