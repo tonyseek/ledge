@@ -1,0 +1,38 @@
+{% extends "layout/master.html" %}
+
+
+{% block body %}
+        <div class="container">
+            <div class="pull-right">
+                <a href="{{ url_for('note.edit_topic', id=topic.id) }}" class="btn">{{ _("Edit This Topic") }}</a>
+                <a href="{{ url_for('note.new_topic') }}" class="btn">{{ _("New Topic") | title }}</a>
+            </div>
+            <h2>{{ _("Topic - %(name)s", name=topic.name.capitalize()) }}</h2>
+
+            <div class="row">
+                {#- topic information #}
+                <div class="span3">
+                    <div>
+                        {{ _("Created at: %(created)s", created=topic.created | datetimeformat) }}
+                    </div>
+                    <div id="related-container">
+                    {%- if topic.description %}
+                        <p>{{ _("Topic Introduce: %(description)s", description=topic.description) }}</p>
+                    {%- endif %}
+                    <div title="{{ _('related topics') }}">
+                    {%- for related_topic in topic.related_topics %}
+                        <a class="label label-topic" href="{{ url_for('note.topic', id=related_topic.id) }}">
+                            {{- related_topic.name -}}
+                        </a>
+                    {%- endfor %}
+                    </div>
+                    </div>
+                </div>
+
+                {#- notes under this topic #}
+                <div class="span9">
+                    #
+                </div>
+            </div>
+        </div>
+{% endblock %}

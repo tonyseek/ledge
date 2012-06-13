@@ -8,11 +8,15 @@
         <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
         {%- endassets %}
         {%- endfor %}
+        {%- block stylesheets %}
+        {%- endblock %}
         {%- for bundle in assets.scripts %}
         {%- assets bundle %}
         <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {%- endassets %}
         {%- endfor %}
+        {%- block scripts %}
+        {%- endblock %}
     </head>
     <body class="container">
         <header>

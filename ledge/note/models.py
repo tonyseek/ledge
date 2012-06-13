@@ -7,33 +7,35 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from ledge.extensions import db
 from ledge.corelib.mixins.comment import Commentable
+from ledge.corelib.mixins.jsonize import Jsonizable
 from ledge.corelib.utils import format
 from ledge.account.models import User
 
 
-# ---------------
-# Topic Node Tree
-# ---------------
+# ----------------
+# Topic Topic Tree
+# ----------------
 
-class NodeClosure(db.Model):
-    """The level closure of the Node."""
+class TopicRelated(db.Model):
+    """The relation closure of the Topic."""
 
-    parent_id = db.Column(db.ForeignKey("node.id"), primary_key=True)
-    child_id = db.Column(db.ForeignKey("node.id"), primary_key=True)
+    topic_id = db.Column(db.ForeignKey("topic.id"), primary_key=True)
+    related_id = db.Column(db.ForeignKey("topic.id"), primary_key=True)
 
 
-class Node(db.Model):
-    """The topic node."""
+class Topic(Jsonizable, db.Model):
+    """The topic Topic."""
+
+    JSONIZE_ATTRS = ("id", "name", "created")
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(20), nullable=False)
+    description = db.Column(db.Unicode(200))
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    parents = db.relationship("Node", secondary=NodeClosure.__table__,
-            primaryjoin=(NodeClosure.child_id == id),
-            secondaryjoin=(NodeClosure.parent_id == id))
-    children = db.relationship("Node", secondary=NodeClosure.__table__,
-            primaryjoin=(NodeClosure.parent_id == id),
-            secondaryjoin=(NodeClosure.child_id == id))
+    related_topics = db.relationship("Topic",
+            primaryjoin=(TopicRelated.related_id == id),
+            secondary=TopicRelated.__table__,
+            secondaryjoin=(TopicRelated.topic_id == id))
 
 
 # ----------------
@@ -45,10 +47,10 @@ class Note(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Unicode(20), nullable=False)
-    node_id = db.Column(db.ForeignKey(Node.id), nullable=False)
+    Topic_id = db.Column(db.ForeignKey(Topic.id), nullable=False)
     owner_id = db.Column(db.ForeignKey(User.id), nullable=False)
-    node = db.relationship(Node, lazy="joined", uselist=False,
-            primaryjoin=(Node.id == node_id))
+    Topic = db.relationship(Topic, lazy="joined", uselist=False,
+            primaryjoin=(Topic.id == Topic_id))
     owner = db.relationship(User, lazy="joined", uselist=False,
             primaryjoin=(User.primary_key == owner_id))
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
